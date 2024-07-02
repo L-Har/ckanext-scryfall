@@ -1,0 +1,14 @@
+# scryfall-js:
+#   filter: rjsmin
+#   output: ckanext-scryfall/%(version)s-scryfall.js
+#   contents:
+#     - js/scryfall.js
+#   extra:
+#     preload:
+#       - base/main
+
+# scryfall-css:
+#   filter: cssrewrite
+#   output: ckanext-scryfall/%(version)s-scryfall.css
+#   contents:
+#     - css/scryfall.css
