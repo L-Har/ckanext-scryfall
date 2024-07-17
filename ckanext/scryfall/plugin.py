@@ -1,44 +1,60 @@
 import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
+
 class ScryfallPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IPackageController)
-    
+
     def read(self, entity):
-        pass
+        """read"""
+        print("In read")
 
     def create(self, entity):
-        pass
+        """create"""
+        print("In ")
+
 
     def edit(self, entity):
-        pass
-
-    def delete(self, entity):
-        pass
-
+        """edit"""
+        print("In ")
+        
+    def delete(self, entity   ):
+        """delete"""
+        print("In ")
+        
     def after_create(self, context, pkg_dict):
-        pass
-
+        """after_create"""
+        print("In ")
+        
     def after_update(self, context, pkg_dict):
-        pass
-
-    def after_delete(self, context, pkg_dict):
-        pass
-
+        """after_update"""
+        print("In ")
+        
+    def after_delete( self, context, pkg_dict):
+        """after_delete"""
+        print("In ")
+        
     def after_show(self, context, pkg_dict):
-        pass
-
-    def before_dataset_search(self, search_params):
-        pass
-
+        """after_show"""
+        print("In ")
+        
+    def before_dataset_search( self, search_params):
+        """before_dataset_search"""
+        print("In ")
+        
     def before_search(self, search_params):
-        pass
-
+        """before_search"""
+        print("In ")
+        
     def after_search(self, search_results, search_params):
-        pass
-
+        """after_search"""
+        print("In ")
+        
     def before_index(self, pkg_dict):
-        pass
-
+        """before_index"""
+        print("In ")
+        
     def before_view(self, pkg_dict):
-        pass
+        """before_view"""
+        print("In ")
+        
