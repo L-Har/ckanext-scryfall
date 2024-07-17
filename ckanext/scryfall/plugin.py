@@ -5,6 +5,8 @@ import ckan.plugins.toolkit as toolkit
 
 
 class ScryfallPlugin(plugins.SingletonPlugin):
+    """Class ScryfallPlugin implements IPackageController"""
+
     plugins.implements(plugins.IPackageController)
 
     def read(self, entity: "model.Package") -> None:
@@ -18,6 +20,8 @@ class ScryfallPlugin(plugins.SingletonPlugin):
 
     def edit(self, entity: "model.Package") -> None:
         """Called after the dataset had been updated inside package_update."""
+
+        print("Editing action")
 
     def delete(self, entity: "model.Package") -> None:
         """Called before commit inside package_delete."""

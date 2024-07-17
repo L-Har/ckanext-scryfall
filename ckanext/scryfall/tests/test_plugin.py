@@ -47,7 +47,9 @@ To temporary patch the CKAN configuration for the duration of a test you can use
     def test_some_action():
         pass
 """
+from ckan.plugins import plugin_loaded
 import ckanext.scryfall.plugin as plugin
+import pytest
 
 
 @pytest.mark.ckan_config("ckan.plugins", "scryfall")
