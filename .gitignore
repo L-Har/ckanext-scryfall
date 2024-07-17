@@ -40,3 +40,8 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# etc
+notes.md
+.vscode
+Makefile
