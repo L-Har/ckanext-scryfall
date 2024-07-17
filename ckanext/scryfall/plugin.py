@@ -11,19 +11,19 @@ class ScryfallPlugin(plugins.SingletonPlugin):
 
     def create(self, entity):
         """create"""
-        print("In ")
+        print("In create")
 
     def edit(self, entity):
         """edit"""
-        print("In ")
+        print("In edit")
 
     def delete(self, entity):
         """delete"""
-        print("In ")
+        print("In delete")
 
     def after_create(self, context, pkg_dict):
         """after_create"""
-        print("In ")
+        print("In after_create")
 
     def after_update(self, context, pkg_dict):
         """after_update"""

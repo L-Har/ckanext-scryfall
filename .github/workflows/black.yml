@@ -3,6 +3,8 @@
 name: Lint
 
 on: [push, pull_request]
+with:
+    src: "./ckanext/scryfall/plugin.y"
 
 jobs:
     lint:
