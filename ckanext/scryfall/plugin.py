@@ -17,7 +17,7 @@ class ScryfallPlugin(plugins.SingletonPlugin):
         """edit"""
         print("In ")
 
-    def delete(self, entity      ):
+    def delete(self, entity):
         """delete"""
         print("In ")
 
