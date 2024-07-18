@@ -1,112 +1,161 @@
-from typing import Any
-from ckan.types import Context
-import ckan.plugins as plugins
-import ckan.plugins.toolkit as toolkit
+"""
+A plugin to connect to the scryfall api from CKAN.
+"""
+
+from urllib.parse import urlparse
+import logging
+from ckan import plugins
+from ckan.types import Any, Context, DataDict
+from ckan.plugins import toolkit
 
 
 class ScryfallPlugin(plugins.SingletonPlugin):
-    """Class ScryfallPlugin implements IPackageController"""
+    """Class ScryfallPlugin implements IResourceView"""
 
-    plugins.implements(plugins.IPackageController)
+    plugins.implements(plugins.IResourceView)
 
-    def read(self, entity: "model.Package") -> None:
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(self, *args, **kwargs)
+        self.__log = logging.getLogger(__name__)
+
+    def info(self) -> dict[str, Any]:
+        """Returns a dictionary with configuration options for the Scryfall Plugin."""
+        scryfall_config = {
+            "name": "scryfall",
+            "title": "Scryfall " + toolkit._("Viewer"),
+            "default_title": "Scryfall " + toolkit._("View"),
+            "default_description": toolkit._(
+                "This is a viewer to the Magic The Gathering Scryfall public API."
+            ),
+            "icon": "magic",
+            "always_available": False,
+            "iframed": True,
+            "preview_enabled": False,
+            "full_page_edit": False,
+        }
+
+        return scryfall_config
+
+    def can_view(self, data_dict: DataDict) -> bool:
         """
-        Called after IPackageController.before_dataset_view inside
-        package_show.
-        """
-
-    def create(self, entity: "model.Package"):
-        """Called after the dataset had been created inside package_create."""
-
-    def edit(self, entity: "model.Package") -> None:
-        """Called after the dataset had been updated inside package_update."""
-
-        print("Editing action")
-
-    def delete(self, entity: "model.Package") -> None:
-        """Called before commit inside package_delete."""
-
-    def after_dataset_create(self, context: Context, pkg_dict: dict[str, Any]) -> None:
-        """
-        Extensions will receive the validated data dict after the dataset
-        has been created (Note that the create method will return a dataset
-        domain object, which may not include all fields). Also the newly
-        created dataset id will be added to the dict.
-        """
-
-    def after_dataset_update(self, context: Context, pkg_dict: dict[str, Any]) -> None:
-        """
-        Extensions will receive the validated data dict after the dataset
-        has been updated.
-
-        Note that bulk dataset update actions (`bulk_update_private`,
-        `bulk_update_public`) will bypass this callback. See
-        ``ckan.plugins.toolkit.chained_action`` to wrap those actions
-        if required.
+        Returns whether the plugin can render Scryfall View.
         """
 
-    def after_dataset_delete(self, context: Context, pkg_dict: dict[str, Any]) -> None:
-        """
-        Extensions will receive the data dict (typically containing
-        just the dataset id) after the dataset has been deleted.
+        def is_scryfall() -> bool:
+            """Check if a data dictionary is in the scryfall format. And do input validation"""
+            resource = None
+            resource_format = ""
+            try:
+                if "resource" in data_dict.keys():
+                    resource = data_dict["resource"]
+                    if "format" in resource.keys():
+                        resource_format = data_dict["resource"]["format"]
+            except AttributeError as e:
+                # Can throw if the wrong data type is sent in as data_dict.
+                self.__log.exception(e)
+                return False
 
-        Note that the `bulk_update_delete` action will bypass this
-        callback. See ``ckan.plugins.toolkit.chained_action`` to wrap
-        that action if required.
-        """
+            return resource_format == "scryfall"
 
-    def after_dataset_show(self, context: Context, pkg_dict: dict[str, Any]) -> None:
-        """
-        Extensions will receive the validated data dict after the dataset
-        is ready for display.
-        """
+        return is_scryfall()
 
-    def before_dataset_search(self, search_params: dict[str, Any]) -> dict[str, Any]:
-        """
-        Extensions will receive a dictionary with the query parameters,
-        and should return a modified (or not) version of it.
-
-        search_params will include an `extras` dictionary with all values
-        from fields starting with `ext_`, so extensions can receive user
-        input from specific fields.
-        """
-        return search_params
-
-    def after_dataset_search(
-        self, search_results: dict[str, Any], search_params: dict[str, Any]
+    def setup_template_variables(
+        self, context: Context, data_dict: DataDict
     ) -> dict[str, Any]:
         """
-        Extensions will receive the search results, as well as the search
-        parameters, and should return a modified (or not) object with the
-        same structure::
+        Adds variables to be passed to the template being rendered.
 
-            {'count': '', 'results': '', 'search_facets': ''}
+        This should return a new dict instead of updating the input
+        ``data_dict``.
 
-        Note that count and facets may need to be adjusted if the extension
-        changed the results for some reason.
+        The ``data_dict`` contains the following keys:
 
-        search_params will include an `extras` dictionary with all values
-        from fields starting with `ext_`, so extensions can receive user
-        input from specific fields.
+        :param resource_view: dict of the resource view being rendered
+        :param resource: dict of the parent resource fields
+        :param package: dict of the full parent dataset
 
+        :returns: a dictionary with the extra variables to pass
+        :rtype: dict
         """
+        skryfall_api_link: str = ""
 
-        return search_results
+        def check_is_valid() -> bool:
+            """Check if a data dictionary has a valid scryfall url."""
+            resource = None
+            url: str = ""
 
-    def before_dataset_index(self, pkg_dict: dict[str, Any]) -> dict[str, Any]:
-        """
-        Extensions will receive what will be given to Solr for
-        indexing. This is essentially a flattened dict (except for
-        multi-valued fields such as tags) of all the terms sent to
-        the indexer. The extension can modify this by returning an
-        altered version.
-        """
-        return pkg_dict
+            # Validate the data structure.
+            if "resource" in data_dict.keys():
+                resource = data_dict["resource"]
+                if "url" in resource.keys():
+                    url = data_dict["resource"]["url"]
 
-    def before_dataset_view(self, pkg_dict: dict[str, Any]) -> dict[str, Any]:
+            if url == "":
+                raise toolkit.ValidationError(
+                    "The url is empty. This resource cannot be viewed."
+                )
+
+            # Now Validate url is a valid scryfall url.
+
+            # We no longer need url as a string so convert to a dict
+            # and reuse the useful variable name "url"
+            url: dict = urlparse(url)
+            hostname: str = ""
+            if "hostname" in url.keys():
+                hostname = url["hostname"]
+                if hostname != "api.skryfall.com":
+                    raise toolkit.ValidationError("Hostname is not api.skryfall.com")
+            else:
+                raise toolkit.ValidationError("There is no hostname found")
+
+            # If we get this far and skryfall_api_link is not an empty string the data needs to be valid.
+            return skryfall_api_link != ""
+
+        try:
+            if not check_is_valid():
+                raise toolkit.ValidationError(
+                    "There was a problem validating the url for the skryfall view"
+                )
+        except toolkit.ValidationError as e:
+            self.__log.exception(str(e))
+            return {}  # Figure out something better to do on bad invalidation TODO
+
+        return {}
+
+    def view_template(self, context: Context, data_dict: DataDict) -> str:
         """
-        Extensions will receive this before the dataset gets
-        displayed. The dictionary passed will be the one that gets
-        sent to the template.
+        Returns a string representing the location of the template to be
+        rendered when the view is displayed
+
+        The path will be relative to the template directory you registered
+        using the :py:func:`~ckan.plugins.toolkit.add_template_directory`
+        on the :py:class:`~ckan.plugins.interfaces.IConfigurer.update_config`
+        method, for instance ``views/my_view.html``.
+
+        :param resource_view: dict of the resource view being rendered
+        :param resource: dict of the parent resource fields
+        :param package: dict of the full parent dataset
+
+        :returns: the location of the view template.
+        :rtype: string
         """
-        return pkg_dict
+        return ""
+
+    def form_template(self, context: Context, data_dict: DataDict) -> str:
+        """
+        Returns a string representing the location of the template to be
+        rendered when the edit view form is displayed
+
+        The path will be relative to the template directory you registered
+        using the :py:func:`~ckan.plugins.toolkit.add_template_directory`
+        on the :py:class:`~ckan.plugins.interfaces.IConfigurer.update_config`
+        method, for instance ``views/my_view_form.html``.
+
+        :param resource_view: dict of the resource view being rendered
+        :param resource: dict of the parent resource fields
+        :param package: dict of the full parent dataset
+
+        :returns: the location of the edit view form template.
+        :rtype: string
+        """
+        return ""
