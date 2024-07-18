@@ -2,6 +2,7 @@
 A plugin to connect to the scryfall api from CKAN.
 """
 
+from urllib.parse import urlparse
 import logging
 from ckan import plugins
 from ckan.types import Any, Context, DataDict
@@ -17,13 +18,12 @@ class ScryfallPlugin(plugins.SingletonPlugin):
         super().__init__(self, *args, **kwargs)
         self.__log = logging.getLogger(__name__)
 
-    # Add custom view renderings for different resource types.
     def info(self) -> dict[str, Any]:
         """Returns a dictionary with configuration options for the Scryfall Plugin."""
         scryfall_config = {
             "name": "scryfall",
-            "title": toolkit._("Scryfall Viewer"),
-            "default_title": toolkit._("Scryfall View"),
+            "title": "Scryfall " + toolkit._("Viewer"),
+            "default_title": "Scryfall " + toolkit._("View"),
             "default_description": toolkit._(
                 "This is a viewer to the Magic The Gathering Scryfall public API."
             ),
@@ -38,16 +38,7 @@ class ScryfallPlugin(plugins.SingletonPlugin):
 
     def can_view(self, data_dict: DataDict) -> bool:
         """
-        Returns whether the plugin can render a particular resource.
-
-        The ``data_dict`` contains the following keys:
-
-        :param resource: dict of the resource fields
-        :param package: dict of the full parent dataset
-
-        :returns: True if the plugin can render a particular resource, False
-            otherwise
-        :rtype: bool
+        Returns whether the plugin can render Scryfall View.
         """
 
         def is_scryfall() -> bool:
@@ -86,6 +77,49 @@ class ScryfallPlugin(plugins.SingletonPlugin):
         :returns: a dictionary with the extra variables to pass
         :rtype: dict
         """
+        skryfall_api_link: str = ""
+
+        def check_is_valid() -> bool:
+            """Check if a data dictionary has a valid scryfall url."""
+            resource = None
+            url: str = ""
+
+            # Validate the data structure.
+            if "resource" in data_dict.keys():
+                resource = data_dict["resource"]
+                if "url" in resource.keys():
+                    url = data_dict["resource"]["url"]
+
+            if url == "":
+                raise toolkit.ValidationError(
+                    "The url is empty. This resource cannot be viewed."
+                )
+
+            # Now Validate url is a valid scryfall url.
+
+            # We no longer need url as a string so convert to a dict
+            # and reuse the useful variable name "url"
+            url: dict = urlparse(url)
+            hostname: str = ""
+            if "hostname" in url.keys():
+                hostname = url["hostname"]
+                if hostname != "api.skryfall.com":
+                    raise toolkit.ValidationError("Hostname is not api.skryfall.com")
+            else:
+                raise toolkit.ValidationError("There is no hostname found")
+
+            # If we get this far and skryfall_api_link is not an empty string the data needs to be valid.
+            return skryfall_api_link != ""
+
+        try:
+            if not check_is_valid():
+                raise toolkit.ValidationError(
+                    "There was a problem validating the url for the skryfall view"
+                )
+        except toolkit.ValidationError as e:
+            self.__log.exception(str(e))
+            return {}  # Figure out something better to do on bad invalidation TODO
+
         return {}
 
     def view_template(self, context: Context, data_dict: DataDict) -> str:
