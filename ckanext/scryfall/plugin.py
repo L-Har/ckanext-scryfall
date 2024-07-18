@@ -23,7 +23,7 @@ class ScryfallPlugin(plugins.SingletonPlugin):
                 "This is a viewer to the Magic The Gathering Scryfall public API."
             ),
             "icon": "magic",
-            "always_available": True,
+            "always_available": False,
             "iframed": True,
             "preview_enabled": False,
             "full_page_edit": False,
@@ -44,7 +44,23 @@ class ScryfallPlugin(plugins.SingletonPlugin):
             otherwise
         :rtype: bool
         """
-        return False
+
+        def is_scryfall() -> bool:
+            """Check if a data dictionary is in the scryfall format. And do input validation"""
+            resource = None
+            resource_format = ""
+
+            if "resource" in data_dict.keys():
+                resource = data_dict["resource"]
+                if "format" in resource.keys():
+                    resource_format = data_dict["resource"]
+
+            return resource_format == "scryfall"
+
+        try:
+            return is_scryfall()
+        except AttributeError: #Can perhaps fail if the wrong data type is sent in as data_dict.
+            return False
 
     def setup_template_variables(
         self, context: Context, data_dict: DataDict
