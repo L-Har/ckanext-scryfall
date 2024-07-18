@@ -58,7 +58,7 @@ class ScryfallPlugin(plugins.SingletonPlugin):
                 if "resource" in data_dict.keys():
                     resource = data_dict["resource"]
                     if "format" in resource.keys():
-                        resource_format = data_dict["resource"]
+                        resource_format = data_dict["resource"]["format"]
             except AttributeError as e:
                 # Can throw if the wrong data type is sent in as data_dict.
                 self.__log.exception(e)
