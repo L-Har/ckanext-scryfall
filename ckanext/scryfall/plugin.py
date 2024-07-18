@@ -2,6 +2,7 @@
 A plugin to connect to the scryfall api from CKAN.
 """
 
+import logging
 from ckan import plugins
 from ckan.types import Any, Context, DataDict
 from ckan.plugins import toolkit
@@ -11,6 +12,10 @@ class ScryfallPlugin(plugins.SingletonPlugin):
     """Class ScryfallPlugin implements IResourceView"""
 
     plugins.implements(plugins.IResourceView)
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(self, *args, **kwargs)
+        self.__log = logging.getLogger(__name__)
 
     # Add custom view renderings for different resource types.
     def info(self) -> dict[str, Any]:
@@ -49,18 +54,19 @@ class ScryfallPlugin(plugins.SingletonPlugin):
             """Check if a data dictionary is in the scryfall format. And do input validation"""
             resource = None
             resource_format = ""
-
-            if "resource" in data_dict.keys():
-                resource = data_dict["resource"]
-                if "format" in resource.keys():
-                    resource_format = data_dict["resource"]
+            try:
+                if "resource" in data_dict.keys():
+                    resource = data_dict["resource"]
+                    if "format" in resource.keys():
+                        resource_format = data_dict["resource"]
+            except AttributeError as e:
+                # Can throw if the wrong data type is sent in as data_dict.
+                self.__log.exception(e)
+                return False
 
             return resource_format == "scryfall"
 
-        try:
-            return is_scryfall()
-        except AttributeError: #Can perhaps fail if the wrong data type is sent in as data_dict.
-            return False
+        return is_scryfall()
 
     def setup_template_variables(
         self, context: Context, data_dict: DataDict
