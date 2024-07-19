@@ -1,4 +1,4 @@
-ckan.module("scryfall-module", function ($, _) {
+ckan.module("wms_viewer-module", function ($, _) {
   "use strict";
   return {
     options: {

@@ -1,0 +1,14 @@
+# wms_viewer-js:
+#   filter: rjsmin
+#   output: ckanext-wms_viewer/%(version)s-wms_viewer.js
+#   contents:
+#     - js/wms_viewer.js
+#   extra:
+#     preload:
+#       - base/main
+
+# wms_viewer-css:
+#   filter: cssrewrite
+#   output: ckanext-wms_viewer/%(version)s-wms_viewer.css
+#   contents:
+#     - css/wms_viewer.css
