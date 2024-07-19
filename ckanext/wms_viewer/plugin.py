@@ -55,7 +55,7 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
                 self.__log.exception(e)
                 return False
 
-            return resource_format == "wms"
+            return resource_format == "WMS"
 
         return is_wms()
 
@@ -83,7 +83,6 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
             """Check if a data dictionary has a valid wms_viewer url."""
             resource = None
             url: str = ""
-            raise toolkit.ValidationError("Testing error logging.")
             # Validate the data structure.
             if "resource" in data_dict.keys():
                 resource = data_dict["resource"]
