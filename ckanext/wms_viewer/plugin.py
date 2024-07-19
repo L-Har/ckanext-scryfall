@@ -23,6 +23,7 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
         # Add extension templates directory
         toolkit.add_template_directory(config, "templates")
         toolkit.add_public_directory(config, "public")
+
     def update_config_schema(self, schema):
         return schema
 
