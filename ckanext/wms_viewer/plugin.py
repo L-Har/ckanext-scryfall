@@ -13,10 +13,18 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
     """Class WmsViewerPlugin implements IResourceView"""
 
     plugins.implements(plugins.IResourceView)
+    plugins.implements(plugins.IConfigurer)
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(self, *args, **kwargs)
         self.__log = logging.getLogger(__name__)
+
+    def update_config(self, config):
+        # Add extension templates directory
+        toolkit.add_template_directory(config, 'templates')
+
+    def update_config_schema(self, schema):
+        return schema
 
     def info(self) -> dict[str, Any]:
         """Returns a dictionary with configuration options for the WmsViewer Plugin."""
@@ -100,10 +108,13 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
             # and reuse the useful variable name "url"
             url: dict = urlparse(url)
             hostname: str = ""
-            if "hostname" in url.keys():
-                hostname = url["hostname"]
-                if hostname != "mapserver.tnris.org":
+            if hasattr(url, 'hostname'):
+                hostname = url.hostname
+                if hostname == "mapserver.tnris.org":
+                    wms_api_link = hostname
+                else:
                     raise toolkit.ValidationError("Hostname is not mapserver.tnris.org")
+                
             else:
                 raise toolkit.ValidationError("There is no hostname found")
 
@@ -117,7 +128,6 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
                 )
         except toolkit.ValidationError as e:
             self.__log.exception(str(e))
-            return {}  # Figure out something better to do on bad invalidation TODO
 
         return {}
 
@@ -126,19 +136,15 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
         Returns a string representing the location of the template to be
         rendered when the view is displayed
 
-        The path will be relative to the template directory you registered
-        using the :py:func:`~ckan.plugins.toolkit.add_template_directory`
-        on the :py:class:`~ckan.plugins.interfaces.IConfigurer.update_config`
-        method, for instance ``views/my_view.html``.
-
         :param resource_view: dict of the resource view being rendered
         :param resource: dict of the parent resource fields
         :param package: dict of the full parent dataset
 
-        :returns: the location of the view template.
+        :returns: the location of the wms view template.
         :rtype: string
         """
-        return ""
+        
+        return "views/wms_template.html"
 
     def form_template(self, context: Context, data_dict: DataDict) -> str:
         """
