@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
-
 entry_points = (
     """
     [ckan.plugins]
-    scryfall=ckanext.scryfall.plugin:ScryfallPlugin
-""",
+    scryfall=ckanext.wms_viewer.plugin:WmsViewerPlugin
+    """,
 )
 setup(
     # If you are changing from the default layout of your extension, you may
@@ -13,10 +12,10 @@ setup(
     # message extraction at
     # http://babel.pocoo.org/docs/messages/#extraction-method-mapping-and-configuration
     message_extractors={
-        "ckanext": [
-            ("**.py", "python", None),
-            ("**.js", "javascript", None),
-            ("**/templates/**.html", "ckan", None),
+        'ckanext': [
+            ('**.py', 'python', None),
+            ('**.js', 'javascript', None),
+            ('**/templates/**.html', 'ckan', None),
         ],
     }
 )

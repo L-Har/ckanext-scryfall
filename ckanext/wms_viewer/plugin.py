@@ -1,5 +1,5 @@
 """
-A plugin to connect to the scryfall api from CKAN.
+A plugin to connect to the a mapserver api from CKAN.
 """
 
 from urllib.parse import urlparse
@@ -9,8 +9,8 @@ from ckan.types import Any, Context, DataDict
 from ckan.plugins import toolkit
 
 
-class ScryfallPlugin(plugins.SingletonPlugin):
-    """Class ScryfallPlugin implements IResourceView"""
+class WmsViewerPlugin(plugins.SingletonPlugin):
+    """Class WmsViewerPlugin implements IResourceView"""
 
     plugins.implements(plugins.IResourceView)
 
@@ -19,13 +19,13 @@ class ScryfallPlugin(plugins.SingletonPlugin):
         self.__log = logging.getLogger(__name__)
 
     def info(self) -> dict[str, Any]:
-        """Returns a dictionary with configuration options for the Scryfall Plugin."""
-        scryfall_config = {
-            "name": "scryfall",
-            "title": "Scryfall " + toolkit._("Viewer"),
-            "default_title": "Scryfall " + toolkit._("View"),
+        """Returns a dictionary with configuration options for the WmsViewer Plugin."""
+        wms_viewer_config = {
+            "name": "wms_viewer",
+            "title": "WMS " + toolkit._("Viewer"),
+            "default_title": "Wms " + toolkit._("View"),
             "default_description": toolkit._(
-                "This is a viewer to the Magic The Gathering Scryfall public API."
+                "This is a viewer to for mapserver wms files."
             ),
             "icon": "magic",
             "always_available": False,
@@ -34,15 +34,15 @@ class ScryfallPlugin(plugins.SingletonPlugin):
             "full_page_edit": False,
         }
 
-        return scryfall_config
+        return wms_viewer_config
 
     def can_view(self, data_dict: DataDict) -> bool:
         """
-        Returns whether the plugin can render Scryfall View.
+        Returns whether the plugin can render Wms View.
         """
 
-        def is_scryfall() -> bool:
-            """Check if a data dictionary is in the scryfall format. And do input validation"""
+        def is_wms() -> bool:
+            """Check if a data dictionary is in the Wms format. And do input validation"""
             resource = None
             resource_format = ""
             try:
@@ -55,9 +55,9 @@ class ScryfallPlugin(plugins.SingletonPlugin):
                 self.__log.exception(e)
                 return False
 
-            return resource_format == "scryfall"
+            return resource_format == "wms"
 
-        return is_scryfall()
+        return is_wms()
 
     def setup_template_variables(
         self, context: Context, data_dict: DataDict
@@ -77,13 +77,13 @@ class ScryfallPlugin(plugins.SingletonPlugin):
         :returns: a dictionary with the extra variables to pass
         :rtype: dict
         """
-        skryfall_api_link: str = ""
+        wms_api_link: str = ""
 
         def check_is_valid() -> bool:
-            """Check if a data dictionary has a valid scryfall url."""
+            """Check if a data dictionary has a valid wms_viewer url."""
             resource = None
             url: str = ""
-
+            raise toolkit.ValidationError("Testing error logging.")
             # Validate the data structure.
             if "resource" in data_dict.keys():
                 resource = data_dict["resource"]
@@ -95,7 +95,7 @@ class ScryfallPlugin(plugins.SingletonPlugin):
                     "The url is empty. This resource cannot be viewed."
                 )
 
-            # Now Validate url is a valid scryfall url.
+            # Now Validate url is a valid wms_viewer url.
 
             # We no longer need url as a string so convert to a dict
             # and reuse the useful variable name "url"
@@ -103,18 +103,18 @@ class ScryfallPlugin(plugins.SingletonPlugin):
             hostname: str = ""
             if "hostname" in url.keys():
                 hostname = url["hostname"]
-                if hostname != "api.skryfall.com":
-                    raise toolkit.ValidationError("Hostname is not api.skryfall.com")
+                if hostname != "mapserver.tnris.org":
+                    raise toolkit.ValidationError("Hostname is not mapserver.tnris.org")
             else:
                 raise toolkit.ValidationError("There is no hostname found")
 
-            # If we get this far and skryfall_api_link is not an empty string the data needs to be valid.
-            return skryfall_api_link != ""
+            # If we get this far and wms_api_link is not an empty string the data needs to be valid.
+            return wms_api_link != ""
 
         try:
             if not check_is_valid():
                 raise toolkit.ValidationError(
-                    "There was a problem validating the url for the skryfall view"
+                    "There was a problem validating the url for the wms view"
                 )
         except toolkit.ValidationError as e:
             self.__log.exception(str(e))

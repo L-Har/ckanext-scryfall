@@ -48,11 +48,11 @@ To temporary patch the CKAN configuration for the duration of a test you can use
         pass
 """
 from ckan.plugins import plugin_loaded
-import ckanext.scryfall.plugin as plugin
+import ckanext.wms_viewer.plugin as plugin
 import pytest
 
 
-@pytest.mark.ckan_config("ckan.plugins", "scryfall")
+@pytest.mark.ckan_config("ckan.plugins", "wms_viewer")
 @pytest.mark.usefixtures("with_plugins")
 def test_plugin():
-    assert plugin_loaded("scryfall")
+    assert plugin_loaded("wms_viewer")
