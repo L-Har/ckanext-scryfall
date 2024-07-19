@@ -21,7 +21,7 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
 
     def update_config(self, config):
         # Add extension templates directory
-        toolkit.add_template_directory(config, 'templates')
+        toolkit.add_template_directory(config, "templates")
 
     def update_config_schema(self, schema):
         return schema
@@ -108,13 +108,13 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
             # and reuse the useful variable name "url"
             url: dict = urlparse(url)
             hostname: str = ""
-            if hasattr(url, 'hostname'):
+            if hasattr(url, "hostname"):
                 hostname = url.hostname
                 if hostname == "mapserver.tnris.org":
                     wms_api_link = hostname
                 else:
                     raise toolkit.ValidationError("Hostname is not mapserver.tnris.org")
-                
+
             else:
                 raise toolkit.ValidationError("There is no hostname found")
 
@@ -143,7 +143,7 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
         :returns: the location of the wms view template.
         :rtype: string
         """
-        
+
         return "views/wms_template.html"
 
     def form_template(self, context: Context, data_dict: DataDict) -> str:
