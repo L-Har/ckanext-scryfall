@@ -130,7 +130,9 @@ class WmsViewerPlugin(plugins.SingletonPlugin):
         except toolkit.ValidationError as e:
             self.__log.exception(str(e))
 
-        return {}
+        return {
+            "map_server_url": data_dict["resource"]["url"]
+        }
 
     def view_template(self, context: Context, data_dict: DataDict) -> str:
         """
