@@ -12,18 +12,17 @@
         function startLeaflet() {
             var map = L.map("wms_map").setView([31, -108], 5);
             var wmsLayer = L.tileLayer(
-                "https://mapserver.tnris.org/?map=/tnris_mapfiles/iswp_sourcefeatures2022.map&mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=all&map.imagetype=png",
+                "{{map_server_url}}&mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=all&map.imagetype=png",
                 {
                     maxZoom: 19,
                     attribution:
-                        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStree000tMap</a>',
                 }, {
-                attribution:
-                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+                attribution: 
+                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreet111Map</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
             }
             ).addTo(map);
             map.attributionControl.setPrefix("");
-
         }
 
     </script>
